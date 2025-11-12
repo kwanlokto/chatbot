@@ -1,0 +1,14 @@
+# Web framework
+fastapi==0.111.1
+
+# ASGI server to run FastAPI
+uvicorn[standard]==0.23.2
+
+# Claude LLM SDK
+anthropic==1.0.0
+
+# Optional: environment variable management
+python-dotenv==1.0.0
+
+# Optional: for making HTTP requests (if needed)
+requests==2.31.0
