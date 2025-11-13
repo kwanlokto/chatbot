@@ -11,8 +11,8 @@ OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
 CHROMA_HOST = os.getenv("CHROMA_HOST", "chromadb")
 CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
 
-MODEL_NAME = "llama2:7b"
-
+GEN_MODEL_NAME = "llama2:7b"
+EMBED_MODEL_NAME = "nomic-embed-text"
 
 # Connect to Chroma server (Docker)
 chroma = Client(Settings(
