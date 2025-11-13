@@ -7,9 +7,9 @@ from chromadb.config import Settings
 
 app = FastAPI()
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
-CHROMA_HOST = os.getenv("CHROMA_HOST", "chromadb")
-CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8001))
 
 GEN_MODEL_NAME = "llama2:7b"
 EMBED_MODEL_NAME = "nomic-embed-text"

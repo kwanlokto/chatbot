@@ -38,13 +38,7 @@ chatbot
    pip install -r requirements.txt
    ```
 
-4. **Set Up Environment Variables**
-   Create a `.env` file in the root directory and add your Anthropic API key:
-   ```
-   ANTHROPIC_API_KEY=your_api_key_here
-   ```
-
-5. **Run the Application**
+4. **Run the Application**
    You can run the application using Uvicorn:
    ```bash
    uvicorn app.main:app --reload
