@@ -1,16 +1,38 @@
-version: "3.8"
-
 services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+
   web:
     build: .
     container_name: chatbot_web
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OLLAMA_URL=http://ollama:11434
+      - CHROMA_URL=http://chromadb:8000
+    depends_on:
+      - ollama
+      - chromadb
     volumes:
       - ./:/app
-    restart: unless-stopped
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  chromadb:
+    container_name: chromadb
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma-data:/chroma
+    environment:
+      - ALLOW_RESET=true
+
+volumes:
+  ollama-data:  # <--- must define here
+  chroma-data:  # <--- also define
