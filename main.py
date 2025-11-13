@@ -1,30 +1,61 @@
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
 import os
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+import requests
+from fastapi import FastAPI
+from pydantic import BaseModel
+from chromadb import Client
+from chromadb.config import Settings
 
 app = FastAPI()
-client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-# Schema for incoming messages
-class Message(BaseModel):
-    messages: list[dict]  # Each dict has "role" and "content"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
+CHROMA_HOST = os.getenv("CHROMA_HOST", "chromadb")
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
+
+# Connect to Chroma server (Docker)
+chroma = Client(Settings(
+    chroma_server_host=CHROMA_HOST,
+    chroma_server_http_port=CHROMA_PORT,
+))
+collection = chroma.get_or_create_collection("docs")
+
+# Request model for chat endpoint
+class ChatRequest(BaseModel):
+    message: str
+
+@app.post("/rag")
+def rag(query: str):
+    # 1. Embed query using Ollama
+    emb = requests.post(
+        f"{OLLAMA_URL}/api/embeddings",
+        json={"model": "nomic-embed-text", "prompt": query}
+    ).json()["embedding"]
+
+    # 2. Retrieve top docs
+    results = collection.query(query_embeddings=[emb], n_results=3)
+    context = " ".join(results["documents"][0])
+
+    # 3. Generate answer with Ollama
+    prompt = f"Context:\n{context}\n\nQuestion: {query}\nAnswer:"
+    res = requests.post(
+        f"{OLLAMA_URL}/api/generate",
+        json={"model": "llama3", "prompt": prompt, "stream": False}
+    ).json()
+
+    return {"response": res["response"]}
+
 
 @app.post("/chat")
-async def chat(request: Message):
-    # Convert messages to Claude format
-    prompt = ""
-    for m in request.messages:
-        if m["role"] == "user":
-            prompt += f"{HUMAN_PROMPT} {m['content']}"
-        else:
-            prompt += f"{AI_PROMPT} {m['content']}"
+def chat(request: ChatRequest):
+    """
+    Freeform chat endpoint that sends user message directly to Ollama.
+    """
+    res = requests.post(
+        f"{OLLAMA_URL}/api/generate",
+        json={
+            "model": "llama3",
+            "prompt": request.message,
+            "stream": False
+        }
+    ).json()
 
-    # Call Claude API
-    response = client.completions.create(
-        model="claude-3.5-sonnet",
-        prompt=prompt,
-        max_tokens_to_sample=500
-    )
-
-    return {"reply": response.completion}
+    return {"response": res["response"]}
