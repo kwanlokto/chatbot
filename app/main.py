@@ -30,7 +30,7 @@ def rag(query: str):
     # 1. Embed query using Ollama
     emb = requests.post(
         f"{OLLAMA_URL}/api/embeddings",
-        json={"model": "nomic-embed-text", "prompt": query}
+        json={"model": EMBED_MODEL_NAME, "prompt": query}
     ).json()["embedding"]
 
     # 2. Retrieve top docs
@@ -41,7 +41,7 @@ def rag(query: str):
     prompt = f"Context:\n{context}\n\nQuestion: {query}\nAnswer:"
     res = requests.post(
         f"{OLLAMA_URL}/api/generate",
-        json={"model": MODEL_NAME, "prompt": prompt, "stream": False}
+        json={"model": GEN_MODEL_NAME, "prompt": prompt, "stream": False}
     ).json()
 
     return {"response": res["response"]}
