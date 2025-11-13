@@ -38,7 +38,7 @@ def rag(query: str):
     prompt = f"Context:\n{context}\n\nQuestion: {query}\nAnswer:"
     res = requests.post(
         f"{OLLAMA_URL}/api/generate",
-        json={"model": "llama3", "prompt": prompt, "stream": False}
+        json={"model": "llama2-7b", "prompt": prompt, "stream": False}
     ).json()
 
     return {"response": res["response"]}
@@ -52,10 +52,10 @@ def chat(request: ChatRequest):
     res = requests.post(
         f"{OLLAMA_URL}/api/generate",
         json={
-            "model": "llama3",
+            "model": "llama2:7b",
             "prompt": request.message,
             "stream": False
         }
     ).json()
-
+    print(res,flush=True)
     return {"response": res["response"]}

@@ -1,2 +1,2 @@
-docker exec ollama ollama pull llama2
-docker exec ollama ollama list
+docker exec ollama ollama pull llama2:7b
+docker exec ollama ollama show
