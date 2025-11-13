@@ -55,7 +55,7 @@ def chat(request: ChatRequest):
     # 1️⃣ Embed the query
     emb = requests.post(
         f"{OLLAMA_URL}/api/embeddings",
-        json={"model": MODEL_NAME, "prompt": request.message}
+        json={"model": EMBED_MODEL_NAME, "prompt": request.message}
     ).json()["embedding"]
 
     # 2️⃣ Retrieve top docs from Chroma
@@ -67,7 +67,7 @@ def chat(request: ChatRequest):
 
     res = requests.post(
         f"{OLLAMA_URL}/api/generate",
-        json={"model": MODEL_NAME, "prompt": prompt, "stream": False}
+        json={"model": GEN_MODEL_NAME, "prompt": prompt, "stream": False}
     ).json()
 
     return {"response": res["response"]}
