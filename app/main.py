@@ -11,6 +11,9 @@ OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
 CHROMA_HOST = os.getenv("CHROMA_HOST", "chromadb")
 CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
 
+MODEL_NAME = "llama2:7b"
+
+
 # Connect to Chroma server (Docker)
 chroma = Client(Settings(
     chroma_server_host=CHROMA_HOST,
@@ -38,7 +41,7 @@ def rag(query: str):
     prompt = f"Context:\n{context}\n\nQuestion: {query}\nAnswer:"
     res = requests.post(
         f"{OLLAMA_URL}/api/generate",
-        json={"model": "llama2-7b", "prompt": prompt, "stream": False}
+        json={"model": MODEL_NAME, "prompt": prompt, "stream": False}
     ).json()
 
     return {"response": res["response"]}
@@ -49,13 +52,22 @@ def chat(request: ChatRequest):
     """
     Freeform chat endpoint that sends user message directly to Ollama.
     """
+    # 1️⃣ Embed the query
+    emb = requests.post(
+        f"{OLLAMA_URL}/api/embeddings",
+        json={"model": MODEL_NAME, "prompt": request.message}
+    ).json()["embedding"]
+
+    # 2️⃣ Retrieve top docs from Chroma
+    results = collection.query(query_embeddings=[emb], n_results=3)
+    context = " ".join(results["documents"][0])  # concatenate top docs
+
+    # 3️⃣ Generate answer using LLM with context
+    prompt = f"Context:\n{context}\n\nQuestion: {request.message}\nAnswer:"
+
     res = requests.post(
         f"{OLLAMA_URL}/api/generate",
-        json={
-            "model": "llama2:7b",
-            "prompt": request.message,
-            "stream": False
-        }
+        json={"model": MODEL_NAME, "prompt": prompt, "stream": False}
     ).json()
-    print(res,flush=True)
+
     return {"response": res["response"]}
