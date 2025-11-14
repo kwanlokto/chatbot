@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import requests
 from definition import collection, OLLAMA_URL, GEN_MODEL_NAME, EMBED_MODEL_NAME, ChatRequest
 
@@ -13,10 +13,13 @@ def chat(message: str):
     emb = requests.post(
         f"{OLLAMA_URL}/api/embeddings",
         json={"model": EMBED_MODEL_NAME, "prompt": message}
-    ).json()["embedding"]
+    ).json()
 
+    query_emb = emb.get("embedding")
+    if not query_emb:
+        raise HTTPException(500, "Embedding model did not return 'embedding'")
     # 2️⃣ Retrieve top docs from Chroma
-    results = collection.query(query_embeddings=[emb], n_results=3)
+    results = collection.query(query_embeddings=[query_emb], n_results=3)
     context = " ".join(results["documents"][0])  # concatenate top docs
 
     # 3️⃣ Generate answer using LLM with context
