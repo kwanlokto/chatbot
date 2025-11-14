@@ -24,5 +24,5 @@ chroma = Client(
 collection = chroma.get_or_create_collection("docs")
 
 
-class ChatRequest(BaseModel):
+class RequestJSON(BaseModel):
     message: str
