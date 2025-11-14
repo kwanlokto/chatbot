@@ -2,7 +2,9 @@ from fastapi import APIRouter, HTTPException
 import requests
 
 from definition import chroma, collection, OLLAMA_URL
+
 router = APIRouter(prefix="/rag", tags=["RAG"])
+
 
 @router.get("/collections")
 def list_collections():
@@ -26,8 +28,7 @@ def get_doc(doc_id: str):
 def query_docs(query: str, n: int = 3):
 
     emb = requests.post(
-        f"{OLLAMA_URL}/api/embeddings",
-        json={"model": "nomic-embed-text", "prompt": query}
+        f"{OLLAMA_URL}/api/embeddings", json={"model": "nomic-embed-text", "prompt": query}
     ).json()
 
     query_emb = emb.get("embedding")

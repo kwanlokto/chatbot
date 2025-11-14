@@ -4,6 +4,7 @@ from definition import collection, OLLAMA_URL, GEN_MODEL_NAME, EMBED_MODEL_NAME,
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
+
 @router.get("/")
 def chat(message: str):
     """
@@ -11,8 +12,7 @@ def chat(message: str):
     """
     # 1️⃣ Embed the query
     emb = requests.post(
-        f"{OLLAMA_URL}/api/embeddings",
-        json={"model": EMBED_MODEL_NAME, "prompt": message}
+        f"{OLLAMA_URL}/api/embeddings", json={"model": EMBED_MODEL_NAME, "prompt": message}
     ).json()
 
     query_emb = emb.get("embedding")
@@ -26,8 +26,7 @@ def chat(message: str):
     prompt = f"Context:\n{context}\n\nQuestion: {message}\nAnswer:"
 
     res = requests.post(
-        f"{OLLAMA_URL}/api/generate",
-        json={"model": GEN_MODEL_NAME, "prompt": prompt, "stream": False}
+        f"{OLLAMA_URL}/api/generate", json={"model": GEN_MODEL_NAME, "prompt": prompt, "stream": False}
     ).json()
 
     return {"response": res["response"]}
