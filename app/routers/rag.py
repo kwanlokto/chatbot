@@ -1,9 +1,12 @@
-from fastapi import APIRouter, HTTPException,  UploadFile, File
-from pypdf import PdfReader
+from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import OllamaEmbeddings
 import uuid
 import requests
-import io
-
+import tempfile
+import os
 from definition import chroma, collection, OLLAMA_URL, EMBED_MODEL_NAME
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
@@ -33,39 +36,58 @@ async def upload_pdf(file: UploadFile = File(...)):
         raise HTTPException(400, "Only PDF files are allowed")
 
     try:
-        # Read PDF bytes
-        pdf_bytes = await file.read()
-        reader = PdfReader(io.BytesIO(pdf_bytes))
+        # -------------------------
+        # Save uploaded PDF to temp file
+        # -------------------------
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(await file.read())
+            tmp_path = tmp.name
 
-        # Extract all text
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
+        # -------------------------
+        # Load PDF with LangChain
+        # -------------------------
+        loader = PyPDFLoader(tmp_path)
+        pages = loader.load()
 
-        if not text.strip():
-            raise HTTPException(400, "PDF text extraction failed or PDF is empty")
+        if not pages:
+            raise HTTPException(400, "Could not extract text from PDF")
 
-        # Generate embeddings
-        emb = requests.post(
-            f"{OLLAMA_URL}/api/embeddings",
-            json={"model": EMBED_MODEL_NAME, "prompt": text}
-        ).json()
+        # -------------------------
+        # Split into chunks
+        # -------------------------
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+        )
+        docs = splitter.split_documents(pages)
 
-        embedding = emb.get("embedding")
-        if not embedding:
-            raise HTTPException(500, "Embedding model did not return 'embedding'")
-
-        # Store document
-        doc_id = str(uuid.uuid4())
-
-        collection.add(
-            ids=[doc_id],
-            documents=[text],
-            embeddings=[embedding],
-            metadatas=[{"filename": file.filename}]
+        # -------------------------
+        # LangChain Embeddings (Ollama)
+        # -------------------------
+        embeddings = OllamaEmbeddings(
+            model=EMBED_MODEL_NAME,
+            base_url=OLLAMA_URL  # important
         )
 
-        return {"message": "PDF uploaded", "doc_id": doc_id}
+        # -------------------------
+        # Insert documents into Chroma
+        # Using your existing Chroma collection
+        # -------------------------
+        texts = [d.page_content for d in docs]
+        metadatas = [d.metadata for d in docs]
+        ids = [str(uuid.uuid4()) for _ in docs]
+
+        collection.add(
+            documents=texts,
+            ids=ids,
+            metadatas=metadatas,
+            embeddings=embeddings.embed_documents(texts),
+        )
+
+        # Cleanup temp pdf
+        os.remove(tmp_path)
+
+        return {"message": "PDF uploaded", "chunks": len(texts)}
 
     except Exception as e:
         raise HTTPException(500, f"Error processing PDF: {str(e)}")
