@@ -8,8 +8,7 @@ This project is a FastAPI application that utilizes the Anthropic API to provide
 chatbot
 ├── app
 │   ├── main.py          # FastAPI application setup and chat endpoint
-│   ├── api
-│   │   ├── routes.py    # API routes and request handling
+│   ├── routers          # API routes and request handling
 │   │   └── __init__.py  # Marks the api directory as a Python package
 │   └── __init__.py      # Marks the app directory as a Python package
 ├── Dockerfile            # Instructions to build the Docker image
@@ -36,6 +35,14 @@ chatbot
 3. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
+   ollama pull llama2:7b
+   ollama pull nomic-embed-text
+   ```
+
+   Alternatively, you can use Docker:
+   ```bash
+   docker compose up --build
+   ./setup_ollama.sh
    ```
 
 4. **Run the Application**
@@ -46,7 +53,7 @@ chatbot
 
    Alternatively, you can use Docker:
    ```bash
-   docker-compose up --build
+   docker compose up -d
    ```
 
 ## Usage
