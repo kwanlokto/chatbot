@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OllamaEmbeddings
-import uuid
+import os
 import requests
 import tempfile
-import os
-from definition import chroma, collection, OLLAMA_URL, EMBED_MODEL_NAME
+import uuid
+
+from definition import chroma, collection, EMBED_MODEL_NAME, OLLAMA_URL
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.embeddings import OllamaEmbeddings
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
 
