@@ -58,18 +58,7 @@ chatbot
 
 ## Usage
 
-Once the application is running, you can send POST requests to the `/chat` endpoint with a JSON body containing messages. The expected format is as follows:
-
-```json
-{
-    "messages": [
-        {"role": "user", "content": "Hello!"},
-        {"role": "assistant", "content": "Hi there!"}
-    ]
-}
-```
-
-The application will respond with a generated reply based on the input messages.
+We are using FastAPI so you can reference the docs via localhost:8000/docs
 
 ## License
 
