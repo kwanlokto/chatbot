@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException
 import requests
-from definition import collection, OLLAMA_URL, GEN_MODEL_NAME, EMBED_MODEL_NAME, ChatRequest
+from definition import EMBED_MODEL_NAME, GEN_MODEL_NAME, OLLAMA_URL, collection
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 

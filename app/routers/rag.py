@@ -1,9 +1,9 @@
 import os
-import requests
 import tempfile
 import uuid
 
-from definition import chroma, collection, EMBED_MODEL_NAME, OLLAMA_URL
+import requests
+from definition import EMBED_MODEL_NAME, OLLAMA_URL, chroma, collection
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader

@@ -1,4 +1,5 @@
 import os
+
 from chromadb import Client
 from chromadb.config import Settings
 from pydantic import BaseModel
