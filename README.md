@@ -41,8 +41,7 @@ chatbot
 
    Alternatively, you can use Docker:
    ```bash
-   docker compose up --build
-   ./setup_ollama.sh
+   ./docker_build.sh
    ```
 
 4. **Run the Application**
