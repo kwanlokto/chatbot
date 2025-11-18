@@ -64,10 +64,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         # -------------------------
         # LangChain Embeddings (Ollama)
         # -------------------------
-        embeddings = OllamaEmbeddings(
-            model=EMBED_MODEL_NAME,
-            base_url=OLLAMA_URL  # important
-        )
+        embeddings = OllamaEmbeddings(model=EMBED_MODEL_NAME, base_url=OLLAMA_URL)  # important
 
         # -------------------------
         # Insert documents into Chroma
@@ -91,6 +88,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     except Exception as e:
         raise HTTPException(500, f"Error processing PDF: {str(e)}")
+
 
 @router.get("/query")
 def query_docs(query: str, n: int = 3):
