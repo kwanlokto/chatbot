@@ -4,7 +4,7 @@ import uuid
 from urllib.parse import unquote
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 
 from definition import chroma, collection
