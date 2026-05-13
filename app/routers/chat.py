@@ -34,6 +34,13 @@ def _ollama_generate(prompt: str) -> str:
         json={"model": GEN_MODEL_NAME, "prompt": prompt, "stream": False},
         timeout=120,
     )
+    if res.status_code == 404:
+        raise RuntimeError(
+            f"Ollama model '{GEN_MODEL_NAME}' not found. "
+            f"Pull it first:\n"
+            f"  Docker: docker exec ollama ollama pull {GEN_MODEL_NAME}\n"
+            f"  Local:  ollama pull {GEN_MODEL_NAME}"
+        )
     res.raise_for_status()
     return res.json()["response"]
 
