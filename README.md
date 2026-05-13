@@ -37,38 +37,45 @@ chatbot/
 
 ## Running Locally
 
-### 1. Start backend services (Ollama + ChromaDB)
+Everything runs via Docker — one command starts all four services.
 
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
-Pull the required Ollama models (first time only):
+| Service | URL |
+|---|---|
+| Frontend (Next.js) | http://localhost:3000 |
+| Backend (FastAPI) | http://localhost:8000 |
+| API docs (Swagger) | http://localhost:8000/docs |
+| ChromaDB | http://localhost:8001 |
+
+**First run only** — pull the Ollama model after the containers are up:
 
 ```bash
 docker exec ollama ollama pull llama3.2
 ```
 
-### 2. Start the FastAPI backend
+> The backend will return LLM errors until the model is pulled. Embeddings and PDF upload work immediately.
+
+### Running without Docker (optional)
+
+If you prefer to run services individually:
 
 ```bash
+# 1. Start Ollama + ChromaDB only
+docker compose up ollama chromadb -d
+docker exec ollama ollama pull llama3.2
+
+# 2. Backend
 pip install -r requirements.txt
-cd app
-uvicorn main:app --reload
-```
+cd app && uvicorn main:app --reload
 
-API available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
-
-### 3. Start the frontend
-
-```bash
+# 3. Frontend
 cd frontend
 cp .env.local.example .env.local
-npm install
-npm run dev
+npm install && npm run dev
 ```
-
-UI available at `http://localhost:3000`.
 
 ## API Endpoints
 
